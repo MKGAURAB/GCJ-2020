@@ -5,7 +5,7 @@ using namespace std;
 int main(int argv, const char *argc[])
 {
     int test, n;
-    vector<pair<int, pair<int, int>>> intervals;
+    vector<pair<int, pair<int, int>>> intervals, seta, setb, setc;
     vector<int> mark;
 
     cin >> test;
@@ -15,40 +15,48 @@ int main(int argv, const char *argc[])
         cin >> n;
 
         mark = vector<int>(n, 0);
+        seta.clear();
+        setb.clear();
+        setc.clear();
         intervals.clear();
 
         for (int i = 0; i < n; ++i)
         {
             int s, e;
             cin >> s >> e;
-            intervals.push_back({e, {s, i}});
+            intervals.push_back({s, {e, i}});
         }
 
-        sort(begin(intervals), end(intervals), greater<pair<int, pair<int, int>>>());
-        int in_count = 1;
-        for (int i = 0; i < (int)intervals.size(); ++i)
+        sort(begin(intervals), end(intervals), less<pair<int, pair<int, int>>>());
+
+        seta.push_back(intervals[0]);
+        mark[seta.back().second.second] = 1;
+
+        for (int i = 1; i < (int)intervals.size(); ++i)
         {
-            int j = i + 1;
-            while (j<(int)intervals.size() && intervals[j].first > intervals[j-1].second.first)
+            if (seta.back().second.first <= intervals[i].first)
             {
-                mark[intervals[j].second.first] = mark[intervals[j - 1].second.first] - 1;
-                j++;
-                in_count++;
+                seta.push_back(intervals[i]);
+                mark[seta.back().second.second] = 1;
             }
-            cout<<i<<" and "<<j<<endl;
-            if (in_count > 2)
-                break;
-
-            in_count = 1;
-            i = j - 1;
-
-            if(i!=0)
+            else
             {
-                mark[intervals[i].second.first] = 1 - mark[intervals[i - 1].second.first];
+                setb.push_back(intervals[i]);
+                mark[setb.back().second.second] = 0;
             }
         }
+
+        if(setb.size()>0) setc.push_back(setb[0]);
+        for(int i=1; i < setb.size(); i++)
+        {
+            if(setc.back().second.first<=setb[i].first)
+            {
+                setc.push_back(setb[i]);
+            }
+        }
+
         cout << "Case #" << kase << ": ";
-        if (in_count > 2)
+        if (setc.size()!=setb.size())
         {
             cout << "IMPOSSIBLE";
         }
@@ -57,7 +65,7 @@ int main(int argv, const char *argc[])
             for (int i = 0; i < (int)mark.size(); ++i)
                 cout << (mark[i] ? "C" : "J");
         }
-        cout<<endl;
+        cout << endl;
     }
 
     return 0;
